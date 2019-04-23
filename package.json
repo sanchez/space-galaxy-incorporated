@@ -1,0 +1,31 @@
+{
+  "name": "space-galaxy-incorporated",
+  "version": "0.0.1",
+  "scripts": {
+    "start": "webpack-dev-server --progress",
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sanchez/space-galaxy-incorporated.git"
+  },
+  "dependencies": {
+    "@types/node": "^11.13.7",
+    "@types/react": "^16.8.14",
+    "@types/react-dom": "^16.8.4",
+    "@types/three": "^0.103.2",
+    "axios": "^0.18.0",
+    "css-loader": "^2.1.1",
+    "file-loader": "^3.0.1",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "style-loader": "^0.23.1",
+    "three": "^0.103.0",
+    "ts-loader": "^5.4.3",
+    "typescript": "^3.4.5",
+    "webpack": "^4.30.0",
+    "webpack-cli": "^3.3.1",
+    "webpack-dev-server": "^3.3.1"
+  }
+}
