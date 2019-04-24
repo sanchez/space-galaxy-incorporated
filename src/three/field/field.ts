@@ -8,6 +8,5 @@ export default class Field extends Renderable {
     }
 
     render() {
-        console.log("rendering field");
     }
 }
