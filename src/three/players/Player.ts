@@ -1,6 +1,5 @@
 import * as THREE from "three";
 import { Renderable } from "../render";
-import Position from "../../api/Position";
 import PlayerPosition from "../../api/PlayerPosition";
 
 enum PlayerEvent {
@@ -46,11 +45,12 @@ export default class Player extends Renderable {
         }
     }
 
-    protected handleMouseMove(ev: MouseEvent) {
+    protected handleMouseMove = (ev: MouseEvent) => {
         ev.preventDefault();
         this.pos.theta += ev.movementX * this.mouseSpeed;
-        this.pos.phi -= ev.movementY * this.mouseSpeed;
+        this.pos.phi += ev.movementY * this.mouseSpeed;
     }
+
 
     onInit() {
         document.addEventListener("keydown", this.handleKeyboardDown.bind(this));
@@ -61,6 +61,17 @@ export default class Player extends Renderable {
             canvas.addEventListener("click", () => {
                 canvas.requestPointerLock();
             });
+
+            const lockChangeAlert = () => {
+                if (document.pointerLockElement === canvas) {
+                    document.addEventListener("mousemove", this.handleMouseMove);
+                } else {
+                    document.removeEventListener("mousemove", this.handleMouseMove);
+                }
+                console.log("Lock change");
+            }
+
+            document.addEventListener("pointerlockchange", lockChangeAlert);
         }, 1000);
 
     }
@@ -79,7 +90,9 @@ export default class Player extends Renderable {
     render() {
         const [x, y, z] = this.pos.toTHREEPosition();
         this.camera.position.set(x, y, z);
-        const [cX, cY, cZ] = this.pos.getCameraLookat();
-        this.camera.lookAt(cX, cY, cZ);
+        const leftRightMat = (new THREE.Matrix4()).makeRotationY(this.pos.theta);
+        const upDownMat = (new THREE.Matrix4()).makeRotationX(this.pos.phi);
+        const transMat = leftRightMat.multiply(upDownMat);
+        this.camera.setRotationFromMatrix(transMat);
     }
 }

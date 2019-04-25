@@ -31,7 +31,7 @@ const Three: FunctionComponent<IThreeProps> = (props) => {
         renderer.setSize(width, height);
         documentEl.current.appendChild(renderer.domElement);
 
-        const i = setInterval(render, 100);
+        const i = setInterval(render, 25);
 
         return () => {
             clearInterval(i);

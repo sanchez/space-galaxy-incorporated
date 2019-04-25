@@ -2,7 +2,17 @@ import Position from "./Position";
 
 export default class PlayerPosition extends Position {
     public theta: number = 0;
-    public phi: number = Math.PI / 2;
+    private _phi: number = 0;
+
+    public get phi() {
+        return this._phi;
+    }
+
+    public set phi(val: number) {
+        if (val <= (-Math.PI / 2)) this._phi = -Math.PI / 2;
+        else if (val >= (Math.PI)) this._phi = Math.PI / 2;
+        else this._phi = val;
+    }
 
     public cameraDistance = 10;
 
