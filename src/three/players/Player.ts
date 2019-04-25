@@ -1,24 +1,28 @@
 import * as THREE from "three";
 import { Renderable } from "../render";
-import PlayerPosition from "../../api/PlayerPosition";
+import PlayerPosition, { Direction } from "../../api/PlayerPosition";
+import Position from "../../api/Position";
+import { promiseSleep } from "../../api/util";
 
 enum PlayerEvent {
-    moveForward,
-    moveBack,
-    moveRight,
-    moveLeft,
     jump,
 };
 
 export default class Player extends Renderable {
-    protected pos = new PlayerPosition(5, 5, 5);
-    protected movementSpeed = 0.01;
-    protected mouseSpeed = -0.01;
+    protected pos: PlayerPosition;
+    protected readonly mouseSpeed = -0.007;
+    protected readonly movementSpeed = 0.1;
 
     protected events = [] as PlayerEvent[];
+    protected keys = new Map<Direction, boolean>();
+
+    private spot: THREE.SpotLight;
+    private spotPoint: THREE.Object3D;
 
     constructor(scene: THREE.Scene, protected camera: THREE.PerspectiveCamera) {
         super(scene);
+        this.pos = new PlayerPosition(5, 0, 1);
+        this.pos.theta = Math.PI / 2;
     }
 
     private addEvent(e: PlayerEvent) {
@@ -28,20 +32,29 @@ export default class Player extends Renderable {
     protected handleKeyboardDown(ev: KeyboardEvent) {
         switch(ev.key) {
             case "w":
-                this.addEvent(PlayerEvent.moveForward);
-                break;
+                return this.keys.set(Direction.Forward, true);
             case "s":
-                this.addEvent(PlayerEvent.moveBack);
-                break;
+                return this.keys.set(Direction.Back, true);
             case "a":
-                this.addEvent(PlayerEvent.moveLeft);
-                break;
+                return this.keys.set(Direction.Left, true);
             case "d":
-                this.addEvent(PlayerEvent.moveRight);
-                break;
+                return this.keys.set(Direction.Right, true);
             case " ":
                 this.addEvent(PlayerEvent.jump);
                 break;
+        }
+    }
+
+    protected handleKeyboardUp(ev: KeyboardEvent) {
+        switch(ev.key) {
+            case "w":
+                return this.keys.set(Direction.Forward, false);
+            case "s":
+                return this.keys.set(Direction.Back, false);
+            case "a":
+                return this.keys.set(Direction.Left, false);
+            case "d":
+                return this.keys.set(Direction.Right, false);
         }
     }
 
@@ -53,8 +66,8 @@ export default class Player extends Renderable {
 
 
     onInit() {
+        document.addEventListener("keyup", this.handleKeyboardUp.bind(this));
         document.addEventListener("keydown", this.handleKeyboardDown.bind(this));
-        // document.addEventListener("mousemove", this.handleMouseMove.bind(this));
 
         setTimeout(() => {
             const canvas = document.querySelector("canvas");
@@ -74,25 +87,54 @@ export default class Player extends Renderable {
             document.addEventListener("pointerlockchange", lockChangeAlert);
         }, 1000);
 
+        this.spot = new THREE.SpotLight(0xffffff, 1, 10, 0.6, 1, 1);
+        const spGeo = new THREE.BoxGeometry(1, 1, 1);
+        this.spotPoint = new THREE.Object3D();
+        this.spot.target = this.spotPoint;
+        this.spot.castShadow = true;
+        this.spot.shadow.mapSize = new THREE.Vector2(1024, 1024);
+        this.addElement("spot", this.spot);
+        this.addElement("spotPoint", this.spotPoint);
+    }
+
+    private async jump() {
+        for (let i = 0; i < 30; i++) {
+            this.pos.add(new Position(0, 0, 0.04));
+            await promiseSleep(30);
+        }
+        while (this.pos.z > 1) {
+            this.pos.add(new Position(0, 0, -0.04));
+            await promiseSleep(30);
+        }
     }
 
     protected applyEvent(e: PlayerEvent) {
         switch(e) {
             case PlayerEvent.jump:
-                return;
-            case PlayerEvent.moveForward:
-                return;
-            case PlayerEvent.moveBack:
+                if (this.pos.z <= 1) {
+                    this.jump().then(() => console.log("Jumped"));
+                }
                 return;
         }
     }
 
+    protected movePlayer() {
+        for (const d of this.keys.keys()) {
+            const b = this.keys.get(d);
+            if (b) this.pos.move(d, this.movementSpeed);
+        }
+    }
+
     render() {
+        this.movePlayer();
+        while (this.events.length > 0) {
+            this.applyEvent(this.events.shift());
+        }
         const [x, y, z] = this.pos.toTHREEPosition();
         this.camera.position.set(x, y, z);
-        const leftRightMat = (new THREE.Matrix4()).makeRotationY(this.pos.theta);
-        const upDownMat = (new THREE.Matrix4()).makeRotationX(this.pos.phi);
-        const transMat = leftRightMat.multiply(upDownMat);
-        this.camera.setRotationFromMatrix(transMat);
+        this.spot.position.set(x, y, z);
+        this.camera.setRotationFromMatrix(this.pos.rotationMatrix);
+        const [sX, sY, sZ] = this.pos.lookingPosition.toTHREEPosition();
+        this.spotPoint.position.set(sX, sY, sZ);
     }
 }

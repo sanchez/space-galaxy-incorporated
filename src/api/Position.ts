@@ -1,3 +1,5 @@
+import Point from "./Point";
+
 export default class Position {
     constructor(protected _x: number, protected _y: number, protected _z: number) {}
 
@@ -17,9 +19,9 @@ export default class Position {
         return [this.x, this.z, this.y];
     }
 
-    public add(p: Position) {
+    public add(p: Position | Point) {
         this._x += p.x;
         this._y += p.y;
-        this._z += p.z;
+        if (p instanceof Position) this._z += p.z;
     }
 }
