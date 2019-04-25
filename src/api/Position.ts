@@ -15,6 +15,10 @@ export default class Position {
         return this._z;
     }
 
+    public copy() {
+        return new Position(this.x, this.y, this.z);
+    }
+
     public toTHREEPosition() {
         return [this.x, this.z, this.y];
     }
@@ -23,5 +27,11 @@ export default class Position {
         this._x += p.x;
         this._y += p.y;
         if (p instanceof Position) this._z += p.z;
+    }
+
+    public subtract(p: Position | Point) {
+        this._x -= p.x;
+        this._y -= p.y;
+        if (p instanceof Position) this._z -= p.z;
     }
 }
