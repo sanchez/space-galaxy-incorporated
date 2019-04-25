@@ -5,7 +5,7 @@ const ids: {[key: string]: boolean} = {};
 
 export abstract class Renderable {
     private name: string;
-    protected children?: Renderable[];
+    protected children?: Renderable[] = [];
 
     constructor(protected scene: THREE.Scene) {
         let name = "";
@@ -30,6 +30,10 @@ export abstract class Renderable {
     protected addElement(elementName: string, el: THREE.Object3D) {
         el.name = `${this.name}-${elementName}`;
         this.scene.add(el);
+    }
+
+    protected removeElement(elementName: string) {
+        this.scene.remove(this.scene.getObjectByName(`${this.name}-${elementName}`));
     }
 
     public shouldUpdate() {

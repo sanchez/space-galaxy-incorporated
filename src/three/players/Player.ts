@@ -3,6 +3,7 @@ import { Renderable } from "../render";
 import PlayerPosition, { Direction } from "../../api/PlayerPosition";
 import Position from "../../api/Position";
 import { promiseSleep } from "../../api/util";
+import Bullet from "./Bullet";
 
 enum PlayerEvent {
     jump,
@@ -64,6 +65,12 @@ export default class Player extends Renderable {
         this.pos.phi += ev.movementY * this.mouseSpeed;
     }
 
+    protected handleMouseDown = (ev: MouseEvent) => {
+        if (ev.button === 0) {
+            const bullet = new Bullet(this.scene, this.pos);
+            this.children.push(bullet);
+        }
+    }
 
     onInit() {
         document.addEventListener("keyup", this.handleKeyboardUp.bind(this));
@@ -78,17 +85,18 @@ export default class Player extends Renderable {
             const lockChangeAlert = () => {
                 if (document.pointerLockElement === canvas) {
                     document.addEventListener("mousemove", this.handleMouseMove);
+                    document.addEventListener("mousedown", this.handleMouseDown);
                 } else {
                     document.removeEventListener("mousemove", this.handleMouseMove);
+                    document.removeEventListener("mousedown", this.handleMouseDown);
                 }
                 console.log("Lock change");
             }
 
             document.addEventListener("pointerlockchange", lockChangeAlert);
-        }, 1000);
+        }, 100);
 
         this.spot = new THREE.SpotLight(0xffffff, 1, 10, 0.6, 1, 1);
-        const spGeo = new THREE.BoxGeometry(1, 1, 1);
         this.spotPoint = new THREE.Object3D();
         this.spot.target = this.spotPoint;
         this.spot.castShadow = true;
@@ -125,6 +133,18 @@ export default class Player extends Renderable {
         }
     }
 
+    protected cleanUpBullets() {
+        this.children = this.children.filter(x => {
+            if (x instanceof Bullet) {
+                if (x.shouldDie()) {
+                    x.willDie();
+                    return false;
+                }
+            }
+            return true;
+        });
+    }
+
     render() {
         this.movePlayer();
         while (this.events.length > 0) {
@@ -136,5 +156,6 @@ export default class Player extends Renderable {
         this.camera.setRotationFromMatrix(this.pos.rotationMatrix);
         const [sX, sY, sZ] = this.pos.lookingPosition.toTHREEPosition();
         this.spotPoint.position.set(sX, sY, sZ);
+        this.cleanUpBullets();
     }
 }

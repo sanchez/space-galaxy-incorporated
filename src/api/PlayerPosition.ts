@@ -48,6 +48,13 @@ export default class PlayerPosition extends Position {
         this.add(move);
     }
 
+    public moveTrueForward(distance: number) {
+        const x = distance * Math.sin(this.theta) * Math.sin(this.phi - Math.PI / 2);
+        const y = distance * Math.cos(this.theta) * Math.sin(this.phi - Math.PI / 2);
+        const z = distance * Math.cos(this.phi - Math.PI / 2);
+        this.add(new Position(x, y, z));
+    }
+
     private readonly distance = 1;
     public get lookingPosition() {
         const x = this.distance * Math.sin(this.theta) * Math.sin(this.phi - Math.PI / 2);
