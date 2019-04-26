@@ -41,7 +41,7 @@ export abstract class Renderable {
     }
 
     public doRender() {
-        if (this.shouldUpdate) this.render();
+        if (this.shouldUpdate()) this.render();
         this.renderChildren();
     }
 
