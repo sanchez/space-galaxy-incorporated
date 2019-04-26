@@ -35,7 +35,7 @@ export class AssetLoader {
         const l = this._bulletLightPool.find(x => x.inUse === false);
         if (l === undefined) return undefined;
         l.inUse = true;
-        l.light.intensity = 4;
+        l.light.intensity = 6;
         return l;
     }
 
@@ -48,26 +48,31 @@ export class AssetLoader {
         // @ts-ignore
         const bulletLoader = new THREE.OBJLoader();
         bulletLoader.load("/blender/objects/bullet.obj", (obj: THREE.Object3D) => {
-            const mat = new MeshPhysicalMaterial({ color: 0xffff55 });
+            const mat = new MeshPhysicalMaterial({ color: 0xffff55, emissive: 0xffff55, emissiveIntensity: 1 });
             // @ts-ignore
             const g = obj.children.map(x => new Mesh(x.geometry, mat)).reduce((p, c) => p.add(c), new Group());
             this._bullet = g;
         }, this.handleBulletLoad, this.handleBulletError);
 
-        for (let i = 0; i < BulletMaxLights; i++) {
-            const l = new PointLight(0xffff55, 0, 1, 1);
-            l.name = `BulletLight-${i}`;
-            scene.add(l);
-            this._bulletLightPool.push({
-                light: l,
-                inUse: false,
-                index: i,
-            });
-        }
+        const i = setInterval(() => {
+            if (this._bulletLightPool.length >= BulletMaxLights) {
+                clearInterval(i);
+            } else {
+                const l = new PointLight(0xffff55, 0, 1.2, 1);
+                l.castShadow = true;
+                l.name = `BulletLight`;
+                scene.add(l);
+                this._bulletLightPool.push({
+                    light: l,
+                    inUse: false,
+                    index: this._bulletLightPool.length,
+                });
+            }
+        }, 50);
     }
 
     public getProgress() {
-        const p = [ this._bulletProgress ];
+        const p = [ this._bulletProgress, (this._bulletLightPool.length / BulletMaxLights) ];
         return p.reduce((p, c) => p + c, 0) / p.length;
     }
 }
