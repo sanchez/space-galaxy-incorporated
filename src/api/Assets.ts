@@ -72,7 +72,7 @@ export class AssetLoader {
     }
 
     public getProgress() {
-        const p = [ this._bulletProgress, (this._bulletLightPool.length / BulletMaxLights) ];
+        const p = [ this._bulletProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
         return p.reduce((p, c) => p + c, 0) / p.length;
     }
 }

@@ -30,7 +30,7 @@ export default class World extends Renderable {
 
     render() {
         if (this.loading) {
-            console.log("Loading: ", Assets.getProgress(), "%");
+            console.log("Loading: ", Math.round(Assets.getProgress() * 100), "%");
             if (Assets.getProgress() === 1) {
                 this.loading = false;
                 this.player = new Player(this.scene, this.camera);
