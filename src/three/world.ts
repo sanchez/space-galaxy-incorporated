@@ -27,7 +27,7 @@ export default class World extends Renderable {
         light.castShadow = true;
         this.addElement("light", light);
         
-        this.addElement("origin", new Mesh(new BoxGeometry(0.5, 0.5, 0.5), new MeshBasicMaterial({ color: 0x00ff00 })));
+        // this.addElement("origin", new Mesh(new BoxGeometry(0.5, 0.5, 0.5), new MeshBasicMaterial({ color: 0x00ff00 })));
     }
 
     render() {
