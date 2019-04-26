@@ -4,7 +4,7 @@ import OBJLoader from "three-obj-loader";
 import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight } from "three";
 OBJLoader(THREE);
 
-const BulletMaxLights = 10;
+const BulletMaxLights = 3;
 
 export interface IBulletLight {
     light: PointLight;
@@ -29,6 +29,21 @@ export class AssetLoader {
         console.error("Failed to load bullet: ", error);
     }
 
+    private _ship1: THREE.Object3D;
+    public get ship1() {
+        if (this._ship1) return this._ship1.clone();
+        throw new Error("Assets not loaded");
+    }
+
+    private _shipProgress: number;
+    protected handleShip1Load = (e: ProgressEvent) => {
+        this._shipProgress = e.loaded / e.total;
+    }
+
+    protected handleShipError = (error: Error) => {
+        console.error("Failed to load ship: ", error);
+    }
+
     private _bulletLightPool = new Array<IBulletLight>();
 
     public requestLight() {
@@ -51,8 +66,21 @@ export class AssetLoader {
             const mat = new MeshPhysicalMaterial({ color: 0xffff55, emissive: 0xffff55, emissiveIntensity: 1 });
             // @ts-ignore
             const g = obj.children.map(x => new Mesh(x.geometry, mat)).reduce((p, c) => p.add(c), new Group());
+            g.scale.multiplyScalar(0.1);
             this._bullet = g;
         }, this.handleBulletLoad, this.handleBulletError);
+
+        // @ts-ignore
+        const shipLoader = new THREE.OBJLoader();
+        shipLoader.load("/blender/objects/space1.obj", (obj: THREE.Object3D) => {
+            const mat = new MeshPhysicalMaterial({ color: 0xd63511 });
+            // @ts-ignore
+            const g = obj.children.map(x => new Mesh(x.geometry, mat)).reduce((p, c) => p.add(c), new Group());
+            g.receiveShadow = true;
+            g.castShadow = true;
+            g.scale.multiplyScalar(0.4);
+            this._ship1 = g;
+        }, this.handleShip1Load, this.handleShipError);
 
         const i = setInterval(() => {
             if (this._bulletLightPool.length >= BulletMaxLights) {
@@ -72,7 +100,7 @@ export class AssetLoader {
     }
 
     public getProgress() {
-        const p = [ this._bulletProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
+        const p = [ this._bulletProgress, this._shipProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
         return p.reduce((p, c) => p + c, 0) / p.length;
     }
 }

@@ -3,6 +3,8 @@ import Field from "./field/field";
 import Player from "./players/Player";
 import { Vector3, Scene, PerspectiveCamera, BoxGeometry, MeshBasicMaterial, Mesh, PointLight } from "three";
 import Assets from "../api/Assets";
+import Ship from "./players/Ship";
+import Point from "../api/Point";
 
 export default class World extends Renderable {
     protected loading = true;
@@ -35,6 +37,9 @@ export default class World extends Renderable {
                 this.loading = false;
                 this.player = new Player(this.scene, this.camera);
                 this.children.push(this.player);
+
+                const s = new Ship(this.scene, new Point(-9, 0));
+                this.children.push(s);
             }
         }
     }

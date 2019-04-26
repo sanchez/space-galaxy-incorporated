@@ -1,8 +1,8 @@
-import Box from "../../api/Box";
+import { Box3 } from "three";
 
 export interface ICollidable {
     collidesWith: (c: ICollidable) => void;
-    boundingBox: Box;
+    boundingBox: Box3;
 }
 
 export function registerCollidable(c: ICollidable) {

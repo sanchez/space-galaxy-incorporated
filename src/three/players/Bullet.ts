@@ -3,7 +3,7 @@ import PlayerPosition, { Direction } from "../../api/PlayerPosition";
 import { registerCollidable, ICollidable, unregisterCollidable } from "../physics/collision";
 import Box from "../../api/Box";
 import Assets, { IBulletLight } from "../../api/Assets";
-import { Geometry, PointLight, Object3D, Scene, BoxGeometry, MeshPhongMaterial, Mesh } from "three";
+import { Geometry, PointLight, Object3D, Scene, BoxGeometry, MeshPhongMaterial, Mesh, Box3 } from "three";
 
 const BulletMaxIterations = 50;
 
@@ -26,7 +26,6 @@ export default class Bullet extends Renderable implements ICollidable {
         const obj = Assets.bullet;
         if (obj) {
             this.shell = obj;
-            this.shell.scale.multiplyScalar(0.1);
             this.addElement("shell", obj);
         } else {
             const shellGeo = new BoxGeometry(0.1, 0.1, 0.3);
@@ -43,7 +42,7 @@ export default class Bullet extends Renderable implements ICollidable {
     }
 
     get boundingBox() {
-        return new Box(this.pos, 0.1, 0.3, 0.1);
+        return new Box3().setFromObject(this.shell)
     }
 
     public shouldDie() {
