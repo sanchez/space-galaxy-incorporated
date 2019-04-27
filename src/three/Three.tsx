@@ -17,13 +17,13 @@ const render = () => {
     const collStart = performance.now();
     runCollisions();
     const collDiff = performance.now() - collStart;
-    if (collDiff >= 4) {
+    if (collDiff >= 10) {
         console.warn("Collisions took: ", collDiff, " ms");
     }
     const renderStart = performance.now();
     world.doRender();
     const renderDiff = performance.now() - renderStart;
-    if (renderDiff >= 4) {
+    if (renderDiff >= 10) {
         console.warn("Rendering took: ", renderDiff, " ms");
     }
     renderer.render(scene, camera);

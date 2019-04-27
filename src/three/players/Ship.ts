@@ -5,6 +5,8 @@ import { Object3D, Scene, Box3 } from "three";
 import Point from "../../api/Point";
 import Assets from "../../api/Assets";
 import Bullet from "./Bullet";
+import Position from "../../api/Position";
+import Box from "../../api/Box";
 
 export default class Ship extends Renderable implements ICollidable {
     protected pos: PlayerPosition;
@@ -17,6 +19,9 @@ export default class Ship extends Renderable implements ICollidable {
     protected health = 100;
     protected shoot: () => void;
 
+    protected size: Position;
+    protected midPoint: Position;
+
     constructor(scene: Scene, originPosition: Point, bulletHandler: (p: PlayerPosition) => void) {
         super(scene);
         this.pos = new PlayerPosition(originPosition.x, originPosition.y, 0.5);
@@ -25,6 +30,8 @@ export default class Ship extends Renderable implements ICollidable {
         this.shoot = () => {
             bulletHandler(this.pos);
         }
+
+        this.midPoint.subtract(this.pos);
     }
 
     onInit() {
@@ -35,19 +42,29 @@ export default class Ship extends Renderable implements ICollidable {
         }
         registerCollidable(this);
 
+        const b = new Box3().setFromObject(this.frame);
+        const max = new Position(b.max.x, b.max.y, b.max.z);
+        const min = new Position(b.min.x, b.min.y, b.min.z);
+        this.size = max.copy();
+        this.size.subtract(min);
+        this.midPoint = max.copy();
+
         const occurance = 20;
         this.iter = 0;
         this.onTick = Math.floor(Math.random() * occurance) + occurance;
     }
 
     collidesWith(c: ICollidable) {
+        console.log("Collided");
         if (c instanceof Bullet) {
             this.health -= 15;
         }
     }
 
     get boundingBox() {
-        return new Box3().setFromObject(this.frame);
+        const p = this.pos.copy();
+        p.add(this.midPoint);
+        return new Box(p, this.size.x, this.size.y, this.size.z);
     }
 
     public shouldDie() {

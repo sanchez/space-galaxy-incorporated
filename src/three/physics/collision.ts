@@ -1,9 +1,10 @@
 import { Box3 } from "three";
 import { number } from "prop-types";
+import Box from "../../api/Box";
 
 export interface ICollidable {
     collidesWith: (c: ICollidable) => void;
-    boundingBox: Box3;
+    boundingBox: Box;
     colId?: number;
 }
 
@@ -24,8 +25,7 @@ export function unregisterCollidable(c: ICollidable) {
 }
 
 export function runCollisions() {
-    return;
-    const boxes = new Map<number, Box3>();
+    const boxes = new Map<number, Box>();
     for (const i of rCollides) {
         boxes.set(i.colId, i.boundingBox);
     }

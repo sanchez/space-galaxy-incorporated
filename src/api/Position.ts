@@ -27,11 +27,15 @@ export default class Position {
         this._x += p.x;
         this._y += p.y;
         if (p instanceof Position) this._z += p.z;
+
+        return this;
     }
 
     public subtract(p: Position | Point) {
         this._x -= p.x;
         this._y -= p.y;
         if (p instanceof Position) this._z -= p.z;
+
+        return this;
     }
 }
