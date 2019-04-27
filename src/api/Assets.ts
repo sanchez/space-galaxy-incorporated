@@ -4,7 +4,7 @@ import OBJLoader from "three-obj-loader";
 import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight } from "three";
 OBJLoader(THREE);
 
-const BulletMaxLights = 3;
+const BulletMaxLights = 10;
 
 export interface IBulletLight {
     light: PointLight;
@@ -14,7 +14,7 @@ export interface IBulletLight {
 
 export class AssetLoader {
 
-    private _bullet: THREE.Object3D;
+    private _bullet: THREE.Group;
     public get bullet() {
         if (this._bullet) return this._bullet.clone();
         throw new Error("Assets not loaded");
@@ -29,7 +29,7 @@ export class AssetLoader {
         console.error("Failed to load bullet: ", error);
     }
 
-    private _ship1: THREE.Object3D;
+    private _ship1: THREE.Group;
     public get ship1() {
         if (this._ship1) return this._ship1.clone();
         throw new Error("Assets not loaded");

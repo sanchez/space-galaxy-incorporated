@@ -19,8 +19,7 @@ export default class Ship extends Renderable implements ICollidable {
     protected health = 100;
     protected shoot: () => void;
 
-    protected size: Position;
-    protected center: Position;
+    private bounding: Box3;
 
     constructor(scene: Scene, originPosition: Point, bulletHandler: (p: PlayerPosition) => void) {
         super(scene);
@@ -31,11 +30,8 @@ export default class Ship extends Renderable implements ICollidable {
             bulletHandler(this.pos);
         }
 
-        const b = new Box3().setFromObject(this.frame);
-        const max = new Position(b.max.x, b.max.z, b.max.y);
-        const min = new Position(b.min.x, b.min.z, b.min.y);
-        this.size = max.copy().subtract(min);
-        this.center = this.size.copy().multiply(0.5);
+        this.frame.setRotationFromMatrix(this.pos.rotationMatrix);
+        this.bounding = new Box3().setFromObject(this.frame);
     }
 
     onInit() {
@@ -52,16 +48,13 @@ export default class Ship extends Renderable implements ICollidable {
     }
 
     collidesWith(c: ICollidable) {
-        console.log("Collided");
         if (c instanceof Bullet) {
             this.health -= 15;
         }
     }
 
-    get boundingBox() {
-        const b = new Box(this.pos.copy().subtract(this.center), this.size.x, this.size.y, this.size.z);
-        b.applyThetaRotation(this.pos.theta);
-        return b;
+    get boundingbox() {
+        return this.bounding;
     }
 
     public shouldDie() {
@@ -77,6 +70,7 @@ export default class Ship extends Renderable implements ICollidable {
         return this.health > 0;
     }
 
+    private lastRotation: number[] = [ NaN ];
     render() {
         this.iter++;
         if (this.iter % this.onTick === 0) {
@@ -84,9 +78,19 @@ export default class Ship extends Renderable implements ICollidable {
         }
 
         if (this.frame) {
-            const p = this.pos.copy().subtract(this.center);
-            const [x, y, z] = p.toTHREEPosition();
+            const [x, y, z] = this.pos.toTHREEPosition();
+
+            const beforePosition = this.frame.position.clone();
             this.frame.position.set(x, y, z);
+            const diffPosition = this.frame.position.clone().sub(beforePosition);
+            this.bounding.translate(diffPosition);
+
+            const r = this.pos.rotationMatrix;
+            const rArray = r.toArray();
+            if (!!this.lastRotation.map((x, i) => x !== rArray[i]).find(x => x)) {
+                this.bounding = new Box3().setFromObject(this.frame);
+                this.lastRotation = rArray.map(x => x);
+            }
             this.frame.setRotationFromMatrix(this.pos.rotationMatrix);
         }
     }

@@ -3,7 +3,7 @@ import PlayerPosition, { Direction } from "../../api/PlayerPosition";
 import { registerCollidable, ICollidable, unregisterCollidable } from "../physics/collision";
 import Box from "../../api/Box";
 import Assets, { IBulletLight } from "../../api/Assets";
-import { Geometry, PointLight, Object3D, Scene, BoxGeometry, MeshPhongMaterial, Mesh, Box3 } from "three";
+import { Geometry, PointLight, Object3D, Scene, BoxGeometry, MeshPhongMaterial, Mesh, Box3, Vector3, Group, BufferGeometry, Matrix4 } from "three";
 import Position from "../../api/Position";
 
 const BulletMaxIterations = 50;
@@ -12,11 +12,9 @@ export default class Bullet extends Renderable implements ICollidable {
     protected pos: PlayerPosition;
     protected readonly speed = 0.3;
     protected iter = 0;
-    protected shell: Object3D;
+    protected shell: Mesh | Group;
     protected light: IBulletLight;
-
-    protected size: Position;
-    protected center: Position;
+    protected bounding: Box3;
 
     constructor(scene: Scene, originPosition: PlayerPosition) {
         super(scene);
@@ -25,11 +23,10 @@ export default class Bullet extends Renderable implements ICollidable {
         this.pos.phi = originPosition.phi;
         this.pos.moveTrueForward(0.8);
 
-        const b = new Box3().setFromObject(this.shell);
-        const max = new Position(b.max.x, b.max.z, b.max.y);
-        const min = new Position(b.min.x, b.min.z, b.min.y);
-        this.size = max.copy().subtract(min);
-        this.center = this.size.copy().multiply(0.5);
+        const [x, y, z] = this.pos.toTHREEPosition();
+        this.shell.position.set(x, y, z);
+        this.shell.setRotationFromMatrix(this.pos.rotationMatrix);
+        this.bounding = new Box3().setFromObject(this.shell);
     }
 
     onInit() {
@@ -52,10 +49,8 @@ export default class Bullet extends Renderable implements ICollidable {
         this.iter = BulletMaxIterations + 1;
     }
 
-    get boundingBox() {
-        const b = new Box(this.pos.copy().subtract(this.center), this.size.x, this.size.y, this.size.z);
-        b.applyThetaRotation(this.pos.theta);
-        return b;
+    get boundingbox() {
+        return this.bounding;
     }
 
     public shouldDie() {
@@ -75,12 +70,26 @@ export default class Bullet extends Renderable implements ICollidable {
         return true;
     }
 
+    private lastRotation: number[] = [ NaN ];
     render() {
         this.iter++;
         this.pos.moveTrueForward(this.speed);
-        const [x, y, z] = this.pos.toTHREEPosition();
+        const p = this.pos.copy();
+        const [x, y, z] = p.toTHREEPosition();
+
+        const beforePosition = this.shell.position.clone();
         this.shell.position.set(x, y, z);
+        const diffPosition = this.shell.position.clone().sub(beforePosition);
+        this.bounding.translate(diffPosition);
+
         if (this.light) this.light.light.position.set(x, y, z);
-        this.shell.setRotationFromMatrix(this.pos.rotationMatrix);
+
+        const r = this.pos.rotationMatrix;
+        const rArray = r.toArray();
+        if (!!this.lastRotation.map((x, i) => x !== rArray[i]).find(x => x)) {
+            this.shell.setRotationFromMatrix(r);
+            this.bounding = new Box3().setFromObject(this.shell);
+            this.lastRotation = rArray.map(x => x);
+        }
     }
 }

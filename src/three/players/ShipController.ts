@@ -10,17 +10,17 @@ export default class ShipController extends Renderable {
     }
 
     protected addBullet(pos: PlayerPosition) {
-        // const p = pos.copy();
-        // p.moveTrueForward(0.1);
-        // const b = new Bullet(this.scene, p);
-        // this.children.push(b);
+        const p = pos.copy();
+        p.moveTrueForward(0.5);
+        const b = new Bullet(this.scene, p);
+        this.children.push(b);
     }
 
     onInit() {
-        this.addShip(new Point(-9, 0));
-        // for (let i = -4; i <= 4; i++) {
-        //     this.addShip(new Point(-9, i));
-        // }
+        // this.addShip(new Point(-9, 0));
+        for (let i = -5; i <= 4; i += 3) {
+            this.addShip(new Point(-9, i));
+        }
     }
 
     protected cleanUpChildren() {

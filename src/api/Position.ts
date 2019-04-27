@@ -27,6 +27,12 @@ export default class Position {
         return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
     }
 
+    public rotateAroundZ(theta: number) {
+        this._x = this.x * Math.cos(theta) - this.y * Math.sin(theta);
+        this._y = this.x * Math.sin(theta) + this.y * Math.cos(theta);
+        this._z = this.z;
+    }
+
     public static fromPolar(mag: number, theta: number, phi: number) {
         const x = mag * Math.sin(theta) * Math.sin(phi);
         const y = mag * Math.cos(theta) * Math.sin(phi);
