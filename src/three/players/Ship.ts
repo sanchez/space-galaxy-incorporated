@@ -14,11 +14,17 @@ export default class Ship extends Renderable implements ICollidable {
     protected iter: number;
     protected onTick: number;
 
-    constructor(scene: Scene, originPosition: Point) {
+    protected health = 100;
+    protected shoot: () => void;
+
+    constructor(scene: Scene, originPosition: Point, bulletHandler: (p: PlayerPosition) => void) {
         super(scene);
         this.pos = new PlayerPosition(originPosition.x, originPosition.y, 0.5);
         this.pos.theta = -Math.PI / 2;
         this.pos.phi = 0;
+        this.shoot = () => {
+            bulletHandler(this.pos);
+        }
     }
 
     onInit() {
@@ -36,7 +42,7 @@ export default class Ship extends Renderable implements ICollidable {
 
     collidesWith(c: ICollidable) {
         if (c instanceof Bullet) {
-            console.log("Got Shot!");
+            this.health -= 15;
         }
     }
 
@@ -45,7 +51,7 @@ export default class Ship extends Renderable implements ICollidable {
     }
 
     public shouldDie() {
-        return false;
+        return this.health <= 0;
     }
 
     public willDie() {
@@ -54,31 +60,11 @@ export default class Ship extends Renderable implements ICollidable {
     }
 
     shouldUpdate() {
-        return true;
-    }
-
-    protected shoot() {
-        const p = this.pos.copy();
-        p.moveTrueForward(0.1);
-        const b = new Bullet(this.scene, p);
-        this.children.push(b);
-    }
-
-    protected cleanUpBullets() {
-        this.children = this.children.filter(x => {
-            if (x instanceof Bullet) {
-                if (x.shouldDie()) {
-                    x.willDie();
-                    return false;
-                }
-            }
-            return true;
-        });
+        return this.health > 0;
     }
 
     render() {
         this.iter++;
-        this.cleanUpBullets();
         if (this.iter % this.onTick === 0) {
             this.shoot();
         }

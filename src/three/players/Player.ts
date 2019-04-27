@@ -90,7 +90,6 @@ export default class Player extends Renderable {
                     document.removeEventListener("mousemove", this.handleMouseMove);
                     document.removeEventListener("mousedown", this.handleMouseDown);
                 }
-                console.log("Lock change");
             }
 
             document.addEventListener("pointerlockchange", lockChangeAlert);

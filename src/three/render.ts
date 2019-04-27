@@ -5,7 +5,7 @@ const ids: {[key: string]: boolean} = {};
 
 export abstract class Renderable {
     private name: string;
-    protected children?: Renderable[] = [];
+    protected children: Renderable[];
 
     constructor(protected scene: THREE.Scene) {
         let name = "";
@@ -17,6 +17,8 @@ export abstract class Renderable {
         } while(ids[name] == true);
         ids[name] = true;
         this.name = name;
+
+        this.children = [];
 
         this.onInit();
     }
@@ -41,12 +43,22 @@ export abstract class Renderable {
     }
 
     public doRender() {
-        if (this.shouldUpdate()) this.render();
+        if (this.shouldUpdate()) {
+            this.render();
+        }
         this.renderChildren();
     }
 
     protected renderChildren() {
-        if (this.children) this.children.forEach(x => x.doRender());
+        if (this.children) this.children.forEach(x => {
+            // const start = performance.now();
+            x.doRender();
+            // const end = performance.now();
+            // const diff = (end - start);
+            // if (diff >= 2) {
+            //     console.warn(`[${this.constructor.name}] (${this.name}) ${diff}`);
+            // }
+        });
     }
 
     protected abstract render(): void;

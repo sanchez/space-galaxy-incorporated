@@ -5,10 +5,12 @@ import { Vector3, Scene, PerspectiveCamera, BoxGeometry, MeshBasicMaterial, Mesh
 import Assets from "../api/Assets";
 import Ship from "./players/Ship";
 import Point from "../api/Point";
+import ShipController from "./players/ShipController";
 
 export default class World extends Renderable {
     protected loading = true;
     protected player: Player;
+    protected ships: ShipController;
 
     constructor(scene: Scene, protected camera: PerspectiveCamera) {
         super(scene);
@@ -38,8 +40,8 @@ export default class World extends Renderable {
                 this.player = new Player(this.scene, this.camera);
                 this.children.push(this.player);
 
-                const s = new Ship(this.scene, new Point(-9, 0));
-                this.children.push(s);
+                this.ships = new ShipController(this.scene);
+                this.children.push(this.ships);
             }
         }
     }

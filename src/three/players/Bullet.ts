@@ -20,6 +20,10 @@ export default class Bullet extends Renderable implements ICollidable {
         this.pos.theta = originPosition.theta;
         this.pos.phi = originPosition.phi;
         this.pos.moveTrueForward(0.8);
+
+        const [x, y, z] = this.pos.toTHREEPosition();
+        this.shell.position.set(x, y, z);
+        this.shell.setRotationFromMatrix(this.pos.rotationMatrix);
     }
 
     onInit() {
@@ -33,12 +37,15 @@ export default class Bullet extends Renderable implements ICollidable {
             this.shell = new Mesh(shellGeo, shellMat);
             this.addElement("shell", this.shell);
         }
+
+        const b = new Box3().setFromObject(this.shell);
+
         this.light = Assets.requestLight();
         registerCollidable(this);
     }
 
     collidesWith(c: ICollidable) {
-        this.iter = BulletMaxIterations;
+        this.iter = BulletMaxIterations + 1;
     }
 
     get boundingBox() {

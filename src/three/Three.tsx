@@ -1,6 +1,7 @@
 import React, { useRef, FunctionComponent, useState } from "react";
 import * as THREE from "three";
 import World from "./world";
+import { runCollisions } from "./physics/collision";
 
 export interface IThreeProps {
 }
@@ -13,7 +14,18 @@ let camera: THREE.PerspectiveCamera;
 let world: World;
 
 const render = () => {
+    const collStart = performance.now();
+    runCollisions();
+    const collDiff = performance.now() - collStart;
+    if (collDiff >= 4) {
+        console.warn("Collisions took: ", collDiff, " ms");
+    }
+    const renderStart = performance.now();
     world.doRender();
+    const renderDiff = performance.now() - renderStart;
+    if (renderDiff >= 4) {
+        console.warn("Rendering took: ", renderDiff, " ms");
+    }
     renderer.render(scene, camera);
 };
 
