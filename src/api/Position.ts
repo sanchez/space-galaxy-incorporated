@@ -38,4 +38,12 @@ export default class Position {
 
         return this;
     }
+
+    public multiply(p: number) {
+        this._x *= p;
+        this._y *= p;
+        this._z *= p;
+
+        return this;
+    }
 }

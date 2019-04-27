@@ -1,7 +1,7 @@
 import { Renderable } from "../render";
 import { ICollidable, registerCollidable, unregisterCollidable } from "../physics/collision";
 import PlayerPosition from "../../api/PlayerPosition";
-import { Object3D, Scene, Box3 } from "three";
+import { Object3D, Scene, Box3, BoxGeometry, Mesh, MeshBasicMaterial } from "three";
 import Point from "../../api/Point";
 import Assets from "../../api/Assets";
 import Bullet from "./Bullet";
@@ -31,7 +31,24 @@ export default class Ship extends Renderable implements ICollidable {
             bulletHandler(this.pos);
         }
 
-        this.midPoint.subtract(this.pos);
+        const [x, y, z] = this.pos.toTHREEPosition();
+        this.frame.position.set(x, y, z);
+        this.frame.setRotationFromMatrix(this.pos.rotationMatrix);
+        const b = new Box3().setFromObject(this.frame);
+        const max = new Position(b.max.x, b.max.z, b.max.y);
+        const min = new Position(b.min.x, b.min.z, b.min.y);
+        this.size = max.copy();
+        this.size.subtract(min);
+        this.midPoint = max.copy().subtract(min).multiply(0.5).subtract(this.pos);
+        console.log(this.midPoint);
+
+        const bGeo = new BoxGeometry(this.size.x, this.size.z, this.size.y);
+        const bb = new Mesh(bGeo, new MeshBasicMaterial({ color: 0x55ff55 }));
+        const p = this.pos.copy();
+        p.add(this.midPoint);
+        const [bx, by, bz] = p.toTHREEPosition();
+        bb.position.set(bx, by, bz);
+        this.addElement("bb", bb);
     }
 
     onInit() {
@@ -41,13 +58,6 @@ export default class Ship extends Renderable implements ICollidable {
             this.addElement("frame", obj);
         }
         registerCollidable(this);
-
-        const b = new Box3().setFromObject(this.frame);
-        const max = new Position(b.max.x, b.max.y, b.max.z);
-        const min = new Position(b.min.x, b.min.y, b.min.z);
-        this.size = max.copy();
-        this.size.subtract(min);
-        this.midPoint = max.copy();
 
         const occurance = 20;
         this.iter = 0;
