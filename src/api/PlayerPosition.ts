@@ -33,6 +33,13 @@ export default class PlayerPosition extends Position {
         else this._phi = val;
     }
 
+    public copy() {
+        const p = new PlayerPosition(this.x, this.y, this.z);
+        p.theta = this.theta
+        p.phi = this.phi;
+        return p;
+    }
+
     public get rotationMatrix() {
         const leftRightMat = (new THREE.Matrix4()).makeRotationY(this.theta);
         const upDownMat = (new THREE.Matrix4()).makeRotationX(this.phi);
