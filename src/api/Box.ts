@@ -1,19 +1,38 @@
 import Position from "./Position";
 
 export default class Box {
-    constructor(protected readonly pos: Position, protected readonly width: number, protected readonly height: number, protected readonly depth: number) {}
+    protected min: Position;
+    protected max: Position;
+    protected pos: Position;
+
+    constructor(pos: Position, protected readonly width: number, protected readonly height: number, protected readonly depth: number) {
+        this.min = new Position(this.width / 2, this.height / 2, this.depth / 2);
+        this.min.subtract(pos);
+
+        this.max = new Position(this.width / 2, this.height / 2, this.depth / 2);
+        this.max.add(pos);
+
+        this.pos = pos;
+    }
 
     public containsPoint(p: Position) {
-        const bigBoy = new Position(this.width / 2, this.height / 2, this.depth / 2)
-        bigBoy.add(this.pos);
-        const smallBoy = new Position(this.width / 2, this.height / 2, this.depth)
-        smallBoy.subtract(this.pos);
-
-        const x = p.x >= smallBoy.x && p.x <= bigBoy.x;
-        const y = p.y >= smallBoy.y && p.y <= bigBoy.y;
-        const z = p.z >= smallBoy.z && p.z <= bigBoy.z;
+        const x = p.x >= this.min.x && p.x <= this.max.x;
+        const y = p.y >= this.min.y && p.y <= this.max.y;
+        const z = p.z >= this.min.z && p.z <= this.max.z;
 
         return x && y && z;
+    }
+
+    public applyThetaRotation(theta: number) {
+        let min = new Position(this.width / 2, this.height / 2, this.depth / 2);
+        min.subtract(this.pos);
+        let newMinTheta = min.theta + theta;
+        this.min = Position.fromPolar(min.mag, newMinTheta, min.phi);
+
+        let max = new Position(this.width / 2, this.height / 2, this.depth / 2);
+        max.add(this.pos);
+        let newMaxTheta = max.theta + theta;
+        this.max = Position.fromPolar(max.mag, newMaxTheta, max.phi);
     }
 
     public intersectsBox(b: Box) {

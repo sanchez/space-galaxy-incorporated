@@ -15,6 +15,25 @@ export default class Position {
         return this._z;
     }
 
+    public get theta() {
+        return Math.atan2(this.y, this.x);
+    }
+
+    public get phi() {
+        return Math.acos(this.z / this.mag);
+    }
+
+    public get mag() {
+        return Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+    }
+
+    public static fromPolar(mag: number, theta: number, phi: number) {
+        const x = mag * Math.sin(theta) * Math.sin(phi);
+        const y = mag * Math.cos(theta) * Math.sin(phi);
+        const z = mag * Math.cos(phi);
+        return new Position(x, y, z);
+    }
+
     public copy() {
         return new Position(this.x, this.y, this.z);
     }

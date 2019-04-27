@@ -20,7 +20,7 @@ export function directionToPoint(d: Direction) {
 }
 
 export default class PlayerPosition extends Position {
-    public theta: number = 0;
+    private _theta: number = 0;
     private _phi: number = 0;
 
     public get phi() {
@@ -31,6 +31,14 @@ export default class PlayerPosition extends Position {
         if (val <= (-Math.PI / 2)) this._phi = -Math.PI / 2;
         else if (val >= (Math.PI / 2)) this._phi = Math.PI / 2;
         else this._phi = val;
+    }
+
+    public get theta() {
+        return this._theta;
+    }
+
+    public set theta(val: number) {
+        this._theta = val;
     }
 
     public copy() {
