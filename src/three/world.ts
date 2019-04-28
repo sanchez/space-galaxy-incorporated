@@ -51,10 +51,8 @@ export default class World extends Renderable implements IUIElement {
 
     gameRunning() {
         if (this.player && !this.player.isAlive) {
-            this.gameoverDiv.innerText = "Game Over";
             return false;
         }
-        this.gameoverDiv.innerText = "";
         return true;
     }
 
@@ -64,7 +62,7 @@ export default class World extends Renderable implements IUIElement {
 
     render() {
         if (this.loading) {
-            console.log("Loading: ", Math.round(Assets.getProgress() * 100), "%");
+            this.gameoverDiv.innerText = `Loading: ${Math.round(Assets.getProgress() * 100)}%`;
             if (Assets.getProgress() === 1) {
                 this.loading = false;
                 this.player = new Player(this.scene, this.camera);
@@ -76,8 +74,11 @@ export default class World extends Renderable implements IUIElement {
                 this.walls = new WallController(this.scene);
                 this.children.push(this.walls);
             }
-        } else {
+        } else if (this.gameRunning()) {
+            this.gameoverDiv.innerText = "";
             this.ships.updatePlayerPosition(this.player.position);
+        } else {
+            this.gameoverDiv.innerText = "Game Over";
         }
     }
 
