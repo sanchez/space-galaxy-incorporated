@@ -4,7 +4,7 @@ import OBJLoader from "three-obj-loader";
 import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight } from "three";
 OBJLoader(THREE);
 
-const BulletMaxLights = 10;
+const BulletMaxLights = 1;
 
 export interface IBulletLight {
     light: PointLight;
@@ -13,16 +13,15 @@ export interface IBulletLight {
 }
 
 export class AssetLoader {
-
     private _bullet: THREE.Group;
     public get bullet() {
         if (this._bullet) return this._bullet.clone();
         throw new Error("Assets not loaded");
     }
 
-    private _bulletProgress: number;
+    private _bulletProgress = 0;
     protected handleBulletLoad = (e: ProgressEvent) => {
-        this._bulletProgress = e.loaded / e.total;
+        this._bulletProgress = e.loaded / e.total - 0.1;
     }
 
     protected handleBulletError = (error: Error) => {
@@ -35,9 +34,9 @@ export class AssetLoader {
         throw new Error("Assets not loaded");
     }
 
-    private _shipProgress: number;
+    private _shipProgress = 0;
     protected handleShip1Load = (e: ProgressEvent) => {
-        this._shipProgress = e.loaded / e.total;
+        this._shipProgress = e.loaded / e.total - 0.1;
     }
 
     protected handleShipError = (error: Error) => {
@@ -68,6 +67,7 @@ export class AssetLoader {
             const g = obj.children.map(x => new Mesh(x.geometry, mat)).reduce((p, c) => p.add(c), new Group());
             g.scale.multiplyScalar(0.1);
             this._bullet = g;
+            this._bulletProgress = 1;
         }, this.handleBulletLoad, this.handleBulletError);
 
         // @ts-ignore
@@ -80,6 +80,7 @@ export class AssetLoader {
             g.castShadow = true;
             g.scale.multiplyScalar(0.4);
             this._ship1 = g;
+            this._shipProgress = 1;
         }, this.handleShip1Load, this.handleShipError);
 
         const i = setInterval(() => {

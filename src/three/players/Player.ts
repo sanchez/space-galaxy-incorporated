@@ -4,12 +4,14 @@ import PlayerPosition, { Direction } from "../../api/PlayerPosition";
 import Position from "../../api/Position";
 import { promiseSleep } from "../../api/util";
 import Bullet from "./Bullet";
+import { ICollidable, registerCollidable } from "../physics/collision";
+import { Box3, Vector3 } from "three";
 
 enum PlayerEvent {
     jump,
 };
 
-export default class Player extends Renderable {
+export default class Player extends Renderable implements ICollidable {
     protected pos: PlayerPosition;
     protected readonly mouseSpeed = -0.007;
     protected readonly movementSpeed = 0.1;
@@ -19,6 +21,9 @@ export default class Player extends Renderable {
 
     private spot: THREE.SpotLight;
     private spotPoint: THREE.Object3D;
+
+    protected health = 100;
+    private bounding: Box3;
 
     constructor(scene: THREE.Scene, protected camera: THREE.PerspectiveCamera) {
         super(scene);
@@ -95,6 +100,9 @@ export default class Player extends Renderable {
             document.addEventListener("pointerlockchange", lockChangeAlert);
         }, 100);
 
+        this.bounding = new Box3().setFromCenterAndSize(new Vector3(), new Vector3(0.3, 1.5, 0.3));
+        registerCollidable(this);
+
         this.spot = new THREE.SpotLight(0xffffff, 1, 10, 0.6, 1, 1);
         this.spotPoint = new THREE.Object3D();
         this.spot.target = this.spotPoint;
@@ -102,6 +110,18 @@ export default class Player extends Renderable {
         this.spot.shadow.mapSize = new THREE.Vector2(1024, 1024);
         this.addElement("spot", this.spot);
         this.addElement("spotPoint", this.spotPoint);
+    }
+
+    collidesWith(c: ICollidable) {
+        if (c instanceof Bullet) {
+            this.health -= 15;
+            console.log("Health: ", this.health);
+        }
+    }
+
+    get boundingbox() {
+        const [x, y, z] = this.pos.toTHREEPosition()
+        return this.bounding.clone().translate(new Vector3(x, y, z));
     }
 
     private async jump() {
