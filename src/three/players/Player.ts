@@ -112,10 +112,17 @@ export default class Player extends Renderable implements ICollidable {
         this.addElement("spotPoint", this.spotPoint);
     }
 
+    public get isAlive() {
+        return this.health > 0;
+    }
+
     collidesWith(c: ICollidable) {
         if (c instanceof Bullet) {
             this.health -= 15;
-            console.log("Health: ", this.health);
+            if (this.health < 0) {
+                this.health = 0;
+                document.exitPointerLock();
+            }
         }
     }
 

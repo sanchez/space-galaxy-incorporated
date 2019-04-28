@@ -32,6 +32,13 @@ export default class World extends Renderable {
         // this.addElement("origin", new Mesh(new BoxGeometry(0.5, 0.5, 0.5), new MeshBasicMaterial({ color: 0x00ff00 })));
     }
 
+    gameRunning() {
+        if (this.player && !this.player.isAlive) {
+            return false;
+        }
+        return true;
+    }
+
     render() {
         if (this.loading) {
             console.log("Loading: ", Math.round(Assets.getProgress() * 100), "%");
@@ -44,5 +51,12 @@ export default class World extends Renderable {
                 this.children.push(this.ships);
             }
         }
+    }
+
+    renderChildren() {
+        if (!this.gameRunning()) return;
+        if (this.children) this.children.forEach(x => {
+            x.doRender();
+        });
     }
 }
