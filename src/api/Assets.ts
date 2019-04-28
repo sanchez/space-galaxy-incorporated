@@ -1,7 +1,7 @@
 import * as THREE from "three";
 // @ts-ignore
 import OBJLoader from "three-obj-loader";
-import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight } from "three";
+import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight, DoubleSide, Font } from "three";
 OBJLoader(THREE);
 
 const BulletMaxLights = 1;
@@ -58,11 +58,21 @@ export class AssetLoader {
         this._bulletLightPool[l.index].light.intensity = 0;
     }
 
+    private _font: Font;
+    public get font() {
+        if (this._font) return this._font;
+        throw new Error("Assets not loaded");
+    }
+    private _fontProgress = 0;
+    protected handleFontProgress = (e: ProgressEvent) => {
+        this._fontProgress = e.loaded / e.total;
+    }
+
     public loadAssets(scene: Scene) {
         // @ts-ignore
         const bulletLoader = new THREE.OBJLoader();
         bulletLoader.load("/blender/objects/bullet.obj", (obj: THREE.Object3D) => {
-            const mat = new MeshPhysicalMaterial({ color: 0xffff55, emissive: 0xffff55, emissiveIntensity: 1 });
+            const mat = new MeshPhysicalMaterial({ color: 0xffff55, emissive: 0xffff55, emissiveIntensity: 1, side: DoubleSide });
             // @ts-ignore
             const g = obj.children.map(x => new Mesh(x.geometry, mat)).reduce((p, c) => p.add(c), new Group());
             g.scale.multiplyScalar(0.1);
@@ -73,7 +83,7 @@ export class AssetLoader {
         // @ts-ignore
         const shipLoader = new THREE.OBJLoader();
         shipLoader.load("/blender/objects/space1.obj", (obj: THREE.Object3D) => {
-            const mat = new MeshPhysicalMaterial({ color: 0xd63511 });
+            const mat = new MeshPhysicalMaterial({ color: 0xd63511, side: DoubleSide });
             // @ts-ignore
             const g = obj.children.map(x => new Mesh(x.geometry, mat)).reduce((p, c) => p.add(c), new Group());
             g.receiveShadow = true;
@@ -82,6 +92,11 @@ export class AssetLoader {
             this._ship1 = g;
             this._shipProgress = 1;
         }, this.handleShip1Load, this.handleShipError);
+
+        const fontLoader = new THREE.FontLoader();
+        fontLoader.load("/fonts/Courier New_Bold.json", (font) => {
+            this._font = font;
+        }, this.handleFontProgress);
 
         const i = setInterval(() => {
             if (this._bulletLightPool.length >= BulletMaxLights) {
@@ -101,7 +116,7 @@ export class AssetLoader {
     }
 
     public getProgress() {
-        const p = [ this._bulletProgress, this._shipProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
+        const p = [ this._bulletProgress, this._shipProgress, this._fontProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
         return p.reduce((p, c) => p + c, 0) / p.length;
     }
 }

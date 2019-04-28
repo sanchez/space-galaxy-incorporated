@@ -1,4 +1,5 @@
 import { Renderable } from "./render";
+import { Scene, Camera } from "three";
 
 export interface IUIElement {
     initializeUI: () => HTMLDivElement;

@@ -2,6 +2,8 @@ import React, { useRef, FunctionComponent, useState } from "react";
 import * as THREE from "three";
 import World from "./world";
 import { runCollisions } from "./physics/collision";
+// @ts-ignore
+import { CSS2DRenderer } from "three-full";
 
 export interface IThreeProps {
 }
@@ -9,6 +11,12 @@ export interface IThreeProps {
 const renderer = new THREE.WebGLRenderer();
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+const overlayRenderer = new CSS2DRenderer();
+overlayRenderer.setSize(window.innerWidth, window.innerHeight);
+overlayRenderer.domElement.style.position = "absolute";
+overlayRenderer.domElement.style.top = "0";
+overlayRenderer.domElement.style.pointerEvents = "none";
+document.body.appendChild(overlayRenderer.domElement);
 const scene = new THREE.Scene();
 let camera: THREE.PerspectiveCamera;
 let world: World;
@@ -27,6 +35,7 @@ const render = () => {
         console.warn("Rendering took: ", renderDiff, " ms");
     }
     renderer.render(scene, camera);
+    overlayRenderer.render(scene, camera);
 };
 
 const Three: FunctionComponent<IThreeProps> = (props) => {
@@ -35,7 +44,7 @@ const Three: FunctionComponent<IThreeProps> = (props) => {
     React.useEffect(() => {
         const width = documentEl.current.clientWidth;
         const height = documentEl.current.clientHeight;
-        camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
+        camera = new THREE.PerspectiveCamera(75, width / height, 0.01, 1000);
         camera.position.set(5, 5, 5);
         camera.lookAt(0, 0, 0);
         world = new World(scene, camera);
