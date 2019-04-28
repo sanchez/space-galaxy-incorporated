@@ -36,6 +36,7 @@ const config = {
 
     devServer: {
         overlay: true,
+        writeToDisk: true
     },
 };
 
