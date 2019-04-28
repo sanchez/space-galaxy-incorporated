@@ -76,6 +76,8 @@ export default class World extends Renderable implements IUIElement {
                 this.walls = new WallController(this.scene);
                 this.children.push(this.walls);
             }
+        } else {
+            this.ships.updatePlayerPosition(this.player.position);
         }
     }
 

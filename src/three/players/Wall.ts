@@ -31,6 +31,10 @@ export default class Wall extends Renderable implements ICollidable {
         registerCollidable(this);
     }
 
+    public get position() {
+        return this.pos.copy();
+    }
+
     protected drawHealth() {
         const geo = new TextGeometry(this.health.toFixed(), {
             font: Assets.font,
@@ -46,7 +50,6 @@ export default class Wall extends Renderable implements ICollidable {
 
         const [x, y, z] = this.pos.copy().add(new Position(0, 0, 0.7)).toTHREEPosition()
         h.position.set(x, y, z);
-        console.log(h.position)
 
         this.removeElement("text");
         this.addElement("text", h);

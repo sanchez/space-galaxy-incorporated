@@ -36,7 +36,7 @@ export class WorldWall extends Renderable implements ICollidable {
     }
 }
 
-const WorldSize = 20;
+export const WorldSize = 20;
 
 export default class Field extends Renderable {
     onInit() {

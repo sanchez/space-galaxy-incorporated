@@ -3,12 +3,13 @@ import { Renderable } from "../render";
 import PlayerPosition, { Direction } from "../../api/PlayerPosition";
 import Position from "../../api/Position";
 import { promiseSleep } from "../../api/util";
-import Bullet from "./Bullet";
+import Bullet, { ShipBullet } from "./Bullet";
 import { ICollidable, registerCollidable } from "../physics/collision";
 import { Box3, Vector3 } from "three";
 import Wall from "./Wall";
 import { IUIElement, registerUIElement } from "../overlay";
 import HealthBar from "../ui/HealthBar";
+import Point from "../../api/Point";
 
 enum PlayerEvent {
     jump,
@@ -29,6 +30,10 @@ export default class Player extends Renderable implements ICollidable, IUIElemen
     private bounding: Box3;
 
     protected healthBar: HealthBar;
+
+    public get position() {
+        return new Point(this.pos.x, this.pos.y);
+    }
 
     constructor(scene: THREE.Scene, protected camera: THREE.PerspectiveCamera) {
         super(scene);
@@ -140,7 +145,7 @@ export default class Player extends Renderable implements ICollidable, IUIElemen
 
     collidingWith?: ICollidable;
     collidesWith(c: ICollidable) {
-        if (c instanceof Bullet) {
+        if (c instanceof ShipBullet) {
             this.health -= 15;
             if (this.health <= 0) document.exitPointerLock();
         } else {

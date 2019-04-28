@@ -1,12 +1,11 @@
 import { Renderable } from "../render";
 import { ICollidable, registerCollidable, unregisterCollidable } from "../physics/collision";
 import PlayerPosition from "../../api/PlayerPosition";
-import { Object3D, Scene, Box3, BoxGeometry, Mesh, MeshBasicMaterial } from "three";
+import { Object3D, Scene, Box3, BoxGeometry, Mesh, MeshBasicMaterial, Vector3 } from "three";
 import Point from "../../api/Point";
 import Assets from "../../api/Assets";
-import Bullet from "./Bullet";
+import Bullet, { ShipBullet } from "./Bullet";
 import Position from "../../api/Position";
-import Box from "../../api/Box";
 
 export default class Ship extends Renderable implements ICollidable {
     protected pos: PlayerPosition;
@@ -16,7 +15,7 @@ export default class Ship extends Renderable implements ICollidable {
     protected iter: number;
     protected onTick: number;
 
-    protected health = 100;
+    protected health = 30;
     protected shoot: () => void;
 
     private bounding: Box3;
@@ -48,13 +47,31 @@ export default class Ship extends Renderable implements ICollidable {
     }
 
     collidesWith(c: ICollidable) {
+        if (c instanceof ShipBullet) {
+            return;
+        }
         if (c instanceof Bullet) {
             this.health -= 15;
         }
     }
 
     get boundingbox() {
-        return this.bounding;
+        const bMin = new Position(this.bounding.min.x, this.bounding.min.z, this.bounding.min.y);
+        const bMax = new Position(this.bounding.max.x, this.bounding.max.z, this.bounding.max.y);
+
+        bMin.subtract(this.pos);
+        bMax.subtract(this.pos);
+
+        bMin.rotateAroundZ(this.pos.theta);
+        bMax.rotateAroundZ(this.pos.theta);
+
+        bMin.add(this.pos);
+        bMax.add(this.pos);
+
+        const v1 = new Vector3(...bMin.toTHREEPosition());
+        const v2 = new Vector3(...bMax.toTHREEPosition());
+        return new Box3().setFromPoints([ v1, v2 ]);
+        // return this.bounding.clone().applyMatrix4(this.pos.rotationMatrix);
     }
 
     public shouldDie() {
@@ -70,10 +87,21 @@ export default class Ship extends Renderable implements ICollidable {
         return this.health > 0;
     }
 
-    private lastRotation: number[] = [ NaN ];
+    protected lastPlayerLocation: Point;
+
+    public updatePlayerPosition(p: Point) {
+        this.lastPlayerLocation = p;
+    }
+
     render() {
+        this.pos.moveTrueForward(0.02);
+
         this.iter++;
         if (this.iter % this.onTick === 0) {
+            const myP = new Point(this.pos.x, this.pos.y);
+            const diffP = myP.subtract(this.lastPlayerLocation);
+
+            this.pos.theta = -diffP.angle + Math.PI / 2;
             this.shoot();
         }
 
@@ -85,12 +113,6 @@ export default class Ship extends Renderable implements ICollidable {
             const diffPosition = this.frame.position.clone().sub(beforePosition);
             this.bounding.translate(diffPosition);
 
-            const r = this.pos.rotationMatrix;
-            const rArray = r.toArray();
-            if (!!this.lastRotation.map((x, i) => x !== rArray[i]).find(x => x)) {
-                this.bounding = new Box3().setFromObject(this.frame);
-                this.lastRotation = rArray.map(x => x);
-            }
             this.frame.setRotationFromMatrix(this.pos.rotationMatrix);
         }
     }

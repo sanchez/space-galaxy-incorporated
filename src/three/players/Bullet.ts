@@ -5,6 +5,7 @@ import Box from "../../api/Box";
 import Assets, { IBulletLight } from "../../api/Assets";
 import { Geometry, PointLight, Object3D, Scene, BoxGeometry, MeshPhongMaterial, Mesh, Box3, Vector3, Group, BufferGeometry, Matrix4 } from "three";
 import Position from "../../api/Position";
+import Ship from "./Ship";
 
 const BulletMaxIterations = 50;
 
@@ -91,5 +92,14 @@ export default class Bullet extends Renderable implements ICollidable {
             this.bounding = new Box3().setFromObject(this.shell);
             this.lastRotation = rArray.map(x => x);
         }
+    }
+}
+
+export class ShipBullet extends Bullet {
+    collidesWith(c: ICollidable) {
+        if (c instanceof Ship) {
+            return;
+        }
+        super.collidesWith(c);
     }
 }

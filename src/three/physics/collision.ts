@@ -25,6 +25,11 @@ export function unregisterCollidable(c: ICollidable) {
 }
 
 export function runCollisions(scene?: Scene) {
+    const boxes = new Map<number, Box3>();
+
+    for (const i of rCollides) {
+        boxes.set(i.colId, i.boundingbox);
+    }
 
     if (scene) {
         scene.children = scene.children.filter(x => !x.name.startsWith("collision"));
@@ -45,13 +50,12 @@ export function runCollisions(scene?: Scene) {
     }
 
     for (const i of rCollides) {
-        for (const j of rCollides) {
-            if (i.colId === j.colId) {
-                continue;
-            }
+        for (const [j, box] of boxes.entries()) {
+            if (i.colId === j) continue;
 
-            if (i.boundingbox.intersectsBox(j.boundingbox)) {
-                i.collidesWith(j);
+            if (boxes.get(i.colId).intersectsBox(box)) {
+                const c = rCollides.find(x => x.colId === j);
+                i.collidesWith(c);
             }
         }
     }
