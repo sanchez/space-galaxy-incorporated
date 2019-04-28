@@ -3,8 +3,6 @@ import Field from "./field/field";
 import Player from "./players/Player";
 import { Vector3, Scene, PerspectiveCamera, BoxGeometry, MeshBasicMaterial, Mesh, PointLight } from "three";
 import Assets from "../api/Assets";
-import Ship from "./players/Ship";
-import Point from "../api/Point";
 import ShipController from "./players/ShipController";
 import WallController from "./players/WallController";
 import { IUIElement, registerUIElement } from "./overlay";
