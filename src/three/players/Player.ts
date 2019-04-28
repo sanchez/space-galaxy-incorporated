@@ -6,6 +6,7 @@ import { promiseSleep } from "../../api/util";
 import Bullet from "./Bullet";
 import { ICollidable, registerCollidable } from "../physics/collision";
 import { Box3, Vector3 } from "three";
+import Wall from "./Wall";
 
 enum PlayerEvent {
     jump,
@@ -116,6 +117,7 @@ export default class Player extends Renderable implements ICollidable {
         return this.health > 0;
     }
 
+    collidingWith?: ICollidable;
     collidesWith(c: ICollidable) {
         if (c instanceof Bullet) {
             this.health -= 15;
@@ -123,6 +125,8 @@ export default class Player extends Renderable implements ICollidable {
                 this.health = 0;
                 document.exitPointerLock();
             }
+        } else {
+            this.collidingWith = c;
         }
     }
 
@@ -155,7 +159,20 @@ export default class Player extends Renderable implements ICollidable {
     protected movePlayer() {
         for (const d of this.keys.keys()) {
             const b = this.keys.get(d);
-            if (b) this.pos.move(d, this.movementSpeed);
+
+            if (b) {
+                if (this.collidingWith) {
+                    const p = this.pos.copy();
+                    p.move(d, this.movementSpeed);
+                    const [x, y, z] = p.toTHREEPosition();
+                    const box = this.bounding.clone().translate(new Vector3(x, y, z));
+                    if (!this.collidingWith.boundingbox.intersectsBox(box)) {
+                        this.pos.move(d, this.movementSpeed);
+                    }
+                } else {
+                    this.pos.move(d, this.movementSpeed);
+                }
+            }
         }
     }
 

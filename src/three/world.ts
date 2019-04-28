@@ -6,11 +6,13 @@ import Assets from "../api/Assets";
 import Ship from "./players/Ship";
 import Point from "../api/Point";
 import ShipController from "./players/ShipController";
+import WallController from "./players/WallController";
 
 export default class World extends Renderable {
     protected loading = true;
     protected player: Player;
     protected ships: ShipController;
+    protected walls: WallController;
 
     constructor(scene: Scene, protected camera: PerspectiveCamera) {
         super(scene);
@@ -49,6 +51,9 @@ export default class World extends Renderable {
 
                 this.ships = new ShipController(this.scene);
                 this.children.push(this.ships);
+
+                this.walls = new WallController(this.scene);
+                this.children.push(this.walls);
             }
         }
     }

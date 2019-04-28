@@ -71,4 +71,13 @@ export default class Position {
 
         return this;
     }
+
+    public normalize() {
+        const d = Math.sqrt(Math.pow(this.x, 2) + Math.pow(this.y, 2) + Math.pow(this.z, 2));
+        this._x /= d;
+        this._y /= d;
+        this._z /= d;
+
+        return this;
+    }
 }
