@@ -7,12 +7,15 @@ import Ship from "./players/Ship";
 import Point from "../api/Point";
 import ShipController from "./players/ShipController";
 import WallController from "./players/WallController";
+import { IUIElement, registerUIElement } from "./overlay";
 
-export default class World extends Renderable {
+export default class World extends Renderable implements IUIElement {
     protected loading = true;
     protected player: Player;
     protected ships: ShipController;
     protected walls: WallController;
+
+    private gameoverDiv: HTMLDivElement;
 
     constructor(scene: Scene, protected camera: PerspectiveCamera) {
         super(scene);
@@ -30,15 +33,31 @@ export default class World extends Renderable {
         light.position.set(25, 25, 25);
         light.castShadow = true;
         this.addElement("light", light);
+
+        this.gameoverDiv = document.createElement("div");
+        this.gameoverDiv.style.position = "fixed";
+        this.gameoverDiv.style.top = "90px";
+        this.gameoverDiv.style.left = "auto";
+        this.gameoverDiv.style.right = "auto";
+        this.gameoverDiv.style.fontSize = "100px";
+        this.gameoverDiv.style.color = "white";
+        this.gameoverDiv.style.textShadow = "2px 2px black";
+        registerUIElement(this);
         
         // this.addElement("origin", new Mesh(new BoxGeometry(0.5, 0.5, 0.5), new MeshBasicMaterial({ color: 0x00ff00 })));
     }
 
     gameRunning() {
         if (this.player && !this.player.isAlive) {
+            this.gameoverDiv.innerText = "Game Over";
             return false;
         }
+        this.gameoverDiv.innerText = "";
         return true;
+    }
+
+    initializeUI() {
+        return this.gameoverDiv;
     }
 
     render() {

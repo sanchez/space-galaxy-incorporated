@@ -7,12 +7,14 @@ import Bullet from "./Bullet";
 import { ICollidable, registerCollidable } from "../physics/collision";
 import { Box3, Vector3 } from "three";
 import Wall from "./Wall";
+import { IUIElement, registerUIElement } from "../overlay";
+import HealthBar from "../ui/HealthBar";
 
 enum PlayerEvent {
     jump,
 };
 
-export default class Player extends Renderable implements ICollidable {
+export default class Player extends Renderable implements ICollidable, IUIElement {
     protected pos: PlayerPosition;
     protected readonly mouseSpeed = -0.007;
     protected readonly movementSpeed = 0.1;
@@ -23,8 +25,10 @@ export default class Player extends Renderable implements ICollidable {
     private spot: THREE.SpotLight;
     private spotPoint: THREE.Object3D;
 
-    protected health = 100;
+    protected _health = 100;
     private bounding: Box3;
+
+    protected healthBar: HealthBar;
 
     constructor(scene: THREE.Scene, protected camera: THREE.PerspectiveCamera) {
         super(scene);
@@ -111,6 +115,23 @@ export default class Player extends Renderable implements ICollidable {
         this.spot.shadow.mapSize = new THREE.Vector2(1024, 1024);
         this.addElement("spot", this.spot);
         this.addElement("spotPoint", this.spotPoint);
+
+        this.healthBar = new HealthBar(100);
+        registerUIElement(this);
+    }
+
+    get health() {
+        return this._health;
+    }
+
+    set health(val: number) {
+        this._health = val;
+        if (this._health < 0) this._health = 0;
+        this.healthBar.health = this._health;
+    }
+
+    initializeUI() {
+        return this.healthBar.domElement;
     }
 
     public get isAlive() {
@@ -121,10 +142,7 @@ export default class Player extends Renderable implements ICollidable {
     collidesWith(c: ICollidable) {
         if (c instanceof Bullet) {
             this.health -= 15;
-            if (this.health < 0) {
-                this.health = 0;
-                document.exitPointerLock();
-            }
+            if (this.health <= 0) document.exitPointerLock();
         } else {
             this.collidingWith = c;
         }
