@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "scripts": {
     "start": "webpack-dev-server --progress",
-    "build": "webpack",
+    "build": "webpack -p",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
