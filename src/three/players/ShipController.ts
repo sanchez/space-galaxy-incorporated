@@ -4,11 +4,15 @@ import Point from "../../api/Point";
 import Bullet, { ShipBullet } from "./Bullet";
 import PlayerPosition from "../../api/PlayerPosition";
 import { WorldSize } from "../field/field";
-import { Vector3 } from "three";
+import { Vector3, Scene } from "three";
 
 let ShipCount = 15;
 
 export default class ShipController extends Renderable {
+    constructor(scene: Scene, private onDeadShip: () => void) {
+        super(scene);
+    }
+
     protected addShip(p: Point) {
         this.children.push(new Ship(this.scene, p, this.addBullet.bind(this)));
     }
@@ -62,6 +66,9 @@ export default class ShipController extends Renderable {
         this.children = this.children.filter(x => {
             if (x instanceof Ship || x instanceof Bullet) {
                 if (x.shouldDie()) {
+                    if (x instanceof Ship) {
+                        this.onDeadShip();
+                    }
                     x.willDie();
                     return false;
                 }

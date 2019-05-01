@@ -12,9 +12,11 @@ export default class World extends Renderable implements IUIElement {
     protected player: Player;
     protected ships: ShipController;
     protected walls: WallController;
+    private _score: number;
 
     private gameoverDiv: HTMLDivElement;
     private instructions: HTMLDivElement;
+    private scoreDiv: HTMLDivElement;
 
     constructor(scene: Scene, protected camera: PerspectiveCamera) {
         super(scene);
@@ -23,11 +25,21 @@ export default class World extends Renderable implements IUIElement {
         document.addEventListener("keypress", this.handleKeyPress);
     }
 
+    protected get score() {
+        return this._score;
+    }
+
+    protected set score(val: number) {
+        this._score = val;
+        this.scoreDiv.innerText = `Score: ${val}`;
+    }
+
     protected handleKeyPress = (e: KeyboardEvent) => {
         if (e.key === "r") {
             this.player.onInit();
             this.ships.reset();
             this.walls.reset();
+            this.score = 0;
         }
     }
 
@@ -55,6 +67,13 @@ export default class World extends Renderable implements IUIElement {
         this.gameoverDiv.style.color = "white";
         this.gameoverDiv.style.textShadow = "2px 2px black";
 
+        this.scoreDiv = document.createElement("div");
+        this.scoreDiv.style.position = "fixed";
+        this.scoreDiv.style.top = "15px";
+        this.scoreDiv.style.left = "15px";
+        this.scoreDiv.style.fontSize = "50px";
+        this.scoreDiv.style.color = "white";
+
         this.instructions = document.createElement("div");
         this.instructions.style.position = "fixed";
         this.instructions.style.top = "15px";
@@ -63,6 +82,8 @@ export default class World extends Renderable implements IUIElement {
         this.instructions.style.color = "white";
         this.instructions.style.maxWidth = "33%";
         this.instructions.innerHTML = "<b>Instructions:</b><br />To move use wasd, to aim use the mouse and click to shoot. Don't get hit by the bullets and shoot the ships.<br />To restart the game press r.<br /><br /><i>NOTE: Due to web security you need to click the screen for the camera movement</i>";
+
+        this.score = 0;
 
         registerUIElement(this);
         
@@ -76,8 +97,12 @@ export default class World extends Renderable implements IUIElement {
         return true;
     }
 
+    handleShipDie = () => {
+        this.score += 1;
+    }
+
     initializeUI() {
-        return [this.gameoverDiv, this.instructions];
+        return [this.gameoverDiv, this.instructions, this.scoreDiv];
     }
 
     render() {
@@ -88,7 +113,7 @@ export default class World extends Renderable implements IUIElement {
                 this.player = new Player(this.scene, this.camera);
                 this.children.push(this.player);
 
-                this.ships = new ShipController(this.scene);
+                this.ships = new ShipController(this.scene, this.handleShipDie);
                 this.children.push(this.ships);
 
                 this.walls = new WallController(this.scene);
