@@ -46,7 +46,7 @@ export default class ShipController extends Renderable {
     }
 
     onInit() {
-        for (let i = 0; i < ShipCount; i++) {
+        for (let i = 0; i < 5; i++) {
             this.addShip(this.generateShipCoords());
         }
     }
@@ -85,7 +85,22 @@ export default class ShipController extends Renderable {
         }
     }
 
+    private iter = 0;
     render() {
+        this.iter++;
         this.cleanUpChildren();
+
+        if (this.iter % 60 === 0) {
+            const shipCount = this.children.reduce((p, c) => {
+                if (c instanceof Ship) {
+                    return p + 1;
+                }
+                return p;
+            }, 0);
+
+            if (shipCount <= ShipCount) {
+                this.addShip(this.generateShipCoords());
+            }
+        }
     }
 }
