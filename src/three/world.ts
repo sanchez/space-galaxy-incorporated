@@ -14,6 +14,7 @@ export default class World extends Renderable implements IUIElement {
     protected walls: WallController;
 
     private gameoverDiv: HTMLDivElement;
+    private instructions: HTMLDivElement;
 
     constructor(scene: Scene, protected camera: PerspectiveCamera) {
         super(scene);
@@ -44,6 +45,16 @@ export default class World extends Renderable implements IUIElement {
         this.gameoverDiv.style.fontSize = "100px";
         this.gameoverDiv.style.color = "white";
         this.gameoverDiv.style.textShadow = "2px 2px black";
+
+        this.instructions = document.createElement("div");
+        this.instructions.style.position = "fixed";
+        this.instructions.style.top = "15px";
+        this.instructions.style.right = "15px";
+        this.instructions.style.fontSize = "20px";
+        this.instructions.style.color = "white";
+        this.instructions.style.maxWidth = "33%";
+        this.instructions.innerHTML = "<b>Instructions:</b><br />To move use wasd, to aim use the mouse and click to shoot. Don't get hit by the bullets and shoot the ships.<br />To restart the game press r.<br /><br /><i>NOTE: Due to web security you need to click the screen for the camera movement</i>";
+
         registerUIElement(this);
         
         // this.addElement("origin", new Mesh(new BoxGeometry(0.5, 0.5, 0.5), new MeshBasicMaterial({ color: 0x00ff00 })));
@@ -57,7 +68,7 @@ export default class World extends Renderable implements IUIElement {
     }
 
     initializeUI() {
-        return this.gameoverDiv;
+        return [this.gameoverDiv, this.instructions];
     }
 
     render() {
