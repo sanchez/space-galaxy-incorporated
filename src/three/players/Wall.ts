@@ -15,8 +15,6 @@ export default class Wall extends Renderable implements ICollidable {
         super(scene);
         this.pos = originPosition.copy().add(new Position(0, 0, 0.5));
         this.health = 300;
-
-        this.drawHealth();
     }
 
     onInit() {
