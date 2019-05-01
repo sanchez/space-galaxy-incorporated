@@ -6,6 +6,7 @@ import Point from "../../api/Point";
 import Assets from "../../api/Assets";
 import Bullet, { ShipBullet } from "./Bullet";
 import Position from "../../api/Position";
+import { WorldWall } from "../field/field";
 
 export default class Ship extends Renderable implements ICollidable {
     protected pos: PlayerPosition;
@@ -46,12 +47,21 @@ export default class Ship extends Renderable implements ICollidable {
         this.onTick = Math.floor(Math.random() * occurance) + occurance;
     }
 
+    lastColliding?: ICollidable;
     collidesWith(c: ICollidable) {
         if (c instanceof ShipBullet) {
             return;
         }
         if (c instanceof Bullet) {
             this.health -= 15;
+            return;
+        }
+
+        if (c instanceof WorldWall) return;
+
+        while (this.boundingbox.intersectsBox(c.boundingbox)) {
+            this.lastColliding = c;
+            this.pos.moveTrueForward(-0.01);
         }
     }
 
@@ -95,6 +105,9 @@ export default class Ship extends Renderable implements ICollidable {
 
     render() {
         this.pos.moveTrueForward(0.02);
+        while (this.lastColliding && this.lastColliding.boundingbox.intersectsBox(this.boundingbox)) {
+            this.pos.moveTrueForward(-0.01);
+        }
 
         this.iter++;
         if (this.iter % this.onTick === 0) {
