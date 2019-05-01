@@ -26,6 +26,17 @@ export default class WallController extends Renderable {
         }
     }
 
+    public reset() {
+        this.children = this.children.filter(x => {
+            if (x instanceof Wall) {
+                x.willDie();
+                return false;
+            }
+            return true;
+        });
+        this.onInit();
+    }
+
     protected cleanUpChildren() {
         this.children = this.children.filter(x => {
             if (x instanceof Wall) {

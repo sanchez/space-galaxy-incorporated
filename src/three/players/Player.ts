@@ -26,7 +26,7 @@ export default class Player extends Renderable implements ICollidable, IUIElemen
     private spot: THREE.SpotLight;
     private spotPoint: THREE.Object3D;
 
-    protected _health = 100;
+    protected _health: number;
     private bounding: Box3;
 
     protected healthBar: HealthBar;
@@ -37,8 +37,30 @@ export default class Player extends Renderable implements ICollidable, IUIElemen
 
     constructor(scene: THREE.Scene, protected camera: THREE.PerspectiveCamera) {
         super(scene);
-        this.pos = new PlayerPosition(5, 0, 1);
-        this.pos.theta = Math.PI / 2;
+        document.addEventListener("keyup", this.handleKeyboardUp.bind(this));
+        document.addEventListener("keydown", this.handleKeyboardDown.bind(this));
+
+        setTimeout(() => {
+            const canvas = document.querySelector("canvas");
+            canvas.addEventListener("click", () => {
+                canvas.requestPointerLock();
+            });
+
+            const lockChangeAlert = () => {
+                if (document.pointerLockElement === canvas) {
+                    document.addEventListener("mousemove", this.handleMouseMove);
+                    document.addEventListener("mousedown", this.handleMouseDown);
+                } else {
+                    document.removeEventListener("mousemove", this.handleMouseMove);
+                    document.removeEventListener("mousedown", this.handleMouseDown);
+                }
+            }
+
+            document.addEventListener("pointerlockchange", lockChangeAlert);
+        }, 100);
+        this.healthBar = new HealthBar(this._health);
+        this.healthBar.health = this._health;
+        registerUIElement(this);
     }
 
     private addEvent(e: PlayerEvent) {
@@ -88,27 +110,8 @@ export default class Player extends Renderable implements ICollidable, IUIElemen
     }
 
     onInit() {
-        document.addEventListener("keyup", this.handleKeyboardUp.bind(this));
-        document.addEventListener("keydown", this.handleKeyboardDown.bind(this));
-
-        setTimeout(() => {
-            const canvas = document.querySelector("canvas");
-            canvas.addEventListener("click", () => {
-                canvas.requestPointerLock();
-            });
-
-            const lockChangeAlert = () => {
-                if (document.pointerLockElement === canvas) {
-                    document.addEventListener("mousemove", this.handleMouseMove);
-                    document.addEventListener("mousedown", this.handleMouseDown);
-                } else {
-                    document.removeEventListener("mousemove", this.handleMouseMove);
-                    document.removeEventListener("mousedown", this.handleMouseDown);
-                }
-            }
-
-            document.addEventListener("pointerlockchange", lockChangeAlert);
-        }, 100);
+        this.pos = new PlayerPosition(5, 0, 1);
+        this.pos.theta = Math.PI / 2;
 
         this.bounding = new Box3().setFromCenterAndSize(new Vector3(), new Vector3(0.3, 1.5, 0.3));
         registerCollidable(this);
@@ -120,9 +123,8 @@ export default class Player extends Renderable implements ICollidable, IUIElemen
         this.spot.shadow.mapSize = new THREE.Vector2(1024, 1024);
         this.addElement("spot", this.spot);
         this.addElement("spotPoint", this.spotPoint);
-
-        this.healthBar = new HealthBar(100);
-        registerUIElement(this);
+        this._health = 100;
+        if (this.healthBar) this.healthBar.health = this._health;
     }
 
     get health() {

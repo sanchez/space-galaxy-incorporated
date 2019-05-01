@@ -47,6 +47,17 @@ export default class ShipController extends Renderable {
         }
     }
 
+    public reset() {
+        this.children = this.children.filter(x => {
+            if (x instanceof Ship || x instanceof Bullet) {
+                x.willDie();
+                return false;
+            }
+            return true;
+        });
+        this.onInit();
+    }
+
     protected cleanUpChildren() {
         this.children = this.children.filter(x => {
             if (x instanceof Ship || x instanceof Bullet) {

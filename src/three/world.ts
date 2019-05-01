@@ -20,6 +20,15 @@ export default class World extends Renderable implements IUIElement {
         super(scene);
         camera.position.set(0, 10, 0);
         camera.lookAt(new Vector3());
+        document.addEventListener("keypress", this.handleKeyPress);
+    }
+
+    protected handleKeyPress = (e: KeyboardEvent) => {
+        if (e.key === "r") {
+            this.player.onInit();
+            this.ships.reset();
+            this.walls.reset();
+        }
     }
 
     onInit() {
