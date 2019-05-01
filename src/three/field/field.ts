@@ -9,7 +9,7 @@ export class WorldWall extends Renderable implements ICollidable {
     constructor(scene: Scene, min: Point, max: Point) {
         super(scene);
 
-        this.bounding = new Box3(new Vector3(min.x, 0, min.y), new Vector3(max.x, 1.2, max.y));
+        this.bounding = new Box3(new Vector3(min.x, 0, min.y), new Vector3(max.x, 4.2, max.y));
 
         const center = new Vector3();
         this.bounding.getCenter(center);
