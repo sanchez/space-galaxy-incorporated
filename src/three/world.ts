@@ -1,7 +1,7 @@
 import { Renderable } from "./render";
 import Field from "./field/field";
 import Player from "./players/Player";
-import { Vector3, Scene, PerspectiveCamera, BoxGeometry, MeshBasicMaterial, Mesh, PointLight, Sphere, SphereGeometry, MeshLambertMaterial } from "three";
+import { Vector3, Scene, PerspectiveCamera, BoxGeometry, MeshBasicMaterial, Mesh, PointLight, Sphere, SphereGeometry, MeshLambertMaterial, AmbientLight } from "three";
 import Assets from "../api/Assets";
 import ShipController from "./players/ShipController";
 import WallController from "./players/WallController";
@@ -46,8 +46,6 @@ export default class World extends Renderable implements IUIElement {
     onInit() {
         Assets.loadAssets(this.scene);
         this.children = [];
-        const field = new Field(this.scene);
-        this.children.push(field);
 
         const light = new PointLight(0xffffaa, 0.2, 100, 2);
         light.position.set(25, 25, 25);
@@ -57,6 +55,9 @@ export default class World extends Renderable implements IUIElement {
         const sun = new Mesh(new SphereGeometry(1), new MeshLambertMaterial({ color: 0xffffaa, emissive: 0xffffaa, emissiveIntensity: 10 }));
         sun.position.set(light.position.x, light.position.y, light.position.z);
         this.addElement("sun", sun);
+
+        const ambientLight = new AmbientLight(0x404040, 0.1);
+        this.addElement("ambient", ambientLight);
 
         this.gameoverDiv = document.createElement("div");
         this.gameoverDiv.style.position = "fixed";
@@ -118,6 +119,9 @@ export default class World extends Renderable implements IUIElement {
 
                 this.walls = new WallController(this.scene);
                 this.children.push(this.walls);
+
+                const field = new Field(this.scene);
+                this.children.push(field);
             }
         } else if (this.gameRunning()) {
             this.gameoverDiv.innerText = "";

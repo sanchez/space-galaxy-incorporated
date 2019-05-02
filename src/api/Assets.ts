@@ -1,7 +1,7 @@
 import * as THREE from "three";
 // @ts-ignore
 import OBJLoader from "three-obj-loader";
-import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight, DoubleSide, Font } from "three";
+import { MeshBasicMaterial, Mesh, MeshLambertMaterial, Group, MeshPhysicalMaterial, Scene, PointLight, DoubleSide, Font, Texture, TextureLoader, Loader } from "three";
 OBJLoader(THREE);
 
 const BulletMaxLights = 1;
@@ -68,6 +68,13 @@ export class AssetLoader {
         this._fontProgress = e.loaded / e.total;
     }
 
+    private _floor: Texture;
+    public get floor() {
+        if (this._floor) return this._floor;
+        throw new Error("Assets not loaded");
+    }
+    private _floorProgress = 0;
+
     public loadAssets(scene: Scene) {
         // @ts-ignore
         const bulletLoader = new THREE.OBJLoader();
@@ -98,6 +105,12 @@ export class AssetLoader {
             this._font = font;
         }, this.handleFontProgress);
 
+        const textureLoader = new TextureLoader();
+        textureLoader.load("/imgs/floor.png", (texture) => {
+            this._floor = texture;
+            this._floorProgress = 1;
+        }, (error) => console.error(error));
+
         const i = setInterval(() => {
             if (this._bulletLightPool.length >= BulletMaxLights) {
                 clearInterval(i);
@@ -116,7 +129,7 @@ export class AssetLoader {
     }
 
     public getProgress() {
-        const p = [ this._bulletProgress, this._shipProgress, this._fontProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
+        const p = [ this._bulletProgress, this._shipProgress, this._fontProgress, this._floorProgress, (this._bulletLightPool.length / BulletMaxLights) ].filter(x => x !== undefined);
         return p.reduce((p, c) => p + c, 0) / p.length;
     }
 }
