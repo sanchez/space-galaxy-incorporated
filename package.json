@@ -25,7 +25,7 @@
     "react-dom": "^16.8.6",
     "signale": "^1.4.0",
     "style-loader": "^0.23.1",
-    "three": "^0.103.0",
+    "three": "^0.125.0",
     "three-css2drender": "^1.0.0",
     "three-full": "^17.1.0",
     "three-obj-loader": "^1.1.3",
